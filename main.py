@@ -11,6 +11,7 @@ pm = parameters.pm
 number_of_iterations = parameters.number_of_iterations
 length_of_individual_initialization = parameters.length_of_individual_initialization
 mean, standard_deviation = parameters.mean, parameters.standard_deviation # for mutation 2
+importance_of_shortest_length = parameters.importance_of_shortest_length
 
 
 def initialization(population_size):
@@ -20,8 +21,6 @@ def initialization(population_size):
         population.append(np.random.randint(1, 5, size=random.randint(1, length_of_individual_initialization)))
     print(population)
     return population
-
-# def movement(action):
 
 
 def run(individual, location_of_individuals_at_each_step):
@@ -56,7 +55,7 @@ def run(individual, location_of_individuals_at_each_step):
         location_of_individuals_at_each_step[-1].append([agent_row, agent_column])
         if [agent_row, agent_column] == [target_row, target_column]:
             return env
-    
+
     return env
 
 
@@ -74,7 +73,7 @@ def fitness(population):
         env = run(individual, location_of_individuals_at_each_step)
         distance = distance_between_agent_and_goal(env)
         is_target_visited = 0 if env[target_row][target_column] == 'T' else 1
-        fitnesses.append(is_target_visited * 10 - distance * 3 - int(0.2 * len(individual)))
+        fitnesses.append(is_target_visited * 10 - distance * 3 - int(importance_of_shortest_length * len(individual)))
     return fitnesses, location_of_individuals_at_each_step
         
 
@@ -84,27 +83,23 @@ def print_best_individual(population, fitnesses):
     print(population[fitnesses.index(max(fitnesses))])
         
 
-# implement ranked-based selection
 def ranked_based_selection(fitnesses):
     for i in range(len(fitnesses)):
-        fitnesses[i] = fitnesses[i] + 20
-    # Given list of fitnesses
-    # fitnesses = [2, 4, 3, 7, 13, 2]
+        fitnesses[i] = fitnesses[i] + abs(min(fitnesses))
 
-    # Rank the fitnesses, highest first
-    # The rank is the index in the sorted list
+    # rank the fitnesses, highest first
+    # the rank is the index in the sorted list
     ranked_fitnesses = sorted(range(len(fitnesses)), key=lambda i: fitnesses[i], reverse=True)
 
-    # Assign selection probabilities based on rank
-    # Here we assign the probability in direct proportion to the rank
-    # The highest rank gets probability len(fitnesses), and the lowest gets 1
+    # assign selection probabilities based on rank
+    # here we assign the probability in direct proportion to the rank
+    # the highest rank gets probability len(fitnesses), and the lowest gets 1
     selection_probabilities = [len(fitnesses) - rank for rank in range(len(fitnesses))]
 
-    # Select the index based on the assigned probabilities
+    # select the index based on the assigned probabilities
     # random.choices returns a list, so we take the first element using [0]
     selected_index = random.choices(ranked_fitnesses, weights=selection_probabilities, k=1)[0]
 
-    # Return the selected index
     return selected_index
 
 
@@ -112,12 +107,12 @@ def roulette_wheel_selection(fitnesses_):
     fitnesses = copy.deepcopy(fitnesses_)
     for i in range(len(fitnesses)):
         fitnesses[i] = fitnesses[i] + abs(min(fitnesses_))
-        fitnesses[i] = int(fitnesses[i] * fitnesses[i]) + 1 # add one to give a chance to all individuals
+        fitnesses[i] = int(fitnesses[i] * fitnesses[i]) + 1 # add one to give a chance to all individuals (even the worst)
     total_fitness = sum(fitnesses)
     selection_probs = [f/total_fitness for f in fitnesses]
-    # Create a cumulative sum of the selection probabilities
+    # create a cumulative sum of the selection probabilities
     cumulative_probs = [sum(selection_probs[:i+1]) for i in range(len(selection_probs))]
-    # Generate a random number between 0 and 1
+    # generate a random number between 0 and 1
     r = random.random()
     
     for i in range(len(fitnesses)):
