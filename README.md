@@ -1,7 +1,7 @@
 # Solving GridWorld problem using a novel Genetic Algorithm
 ## Running
 Run main.py
-<br>You can change parameters of the algorithm by modifying parameters.py
+<br>You can change the parameters of the algorithm by modifying parameters.py
 ## Algorithm
 The schematic of the method is shown below
 
