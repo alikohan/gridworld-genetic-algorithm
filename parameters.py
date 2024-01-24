@@ -1,3 +1,4 @@
+# 1 represents an obstacle, while 0 represents a free state
 environment = [['A',0, 0, 1, 0], 
                 [0, 0, 0, 0, 0], 
                 [0, 0, 1, 1, 0],
